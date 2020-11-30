@@ -1,0 +1,28 @@
+The project directory contains:
+- flaskr/, a Python package containing the application code and files
+- venv/, a Python virtual environment where Flask and other dependencies are installed
+
+activate the environment:
+- $ . venv/bin/activate
+
+run the apllication
+- $ export FLASK_APP=flaskr
+- $ export FLASK_ENV=development
+- $ flask run
+
+Final Presentation slides: https://docs.google.com/presentation/d/1SGJcr1zuQfQSMOselWDuopmhxquGEZHYp-gep9GK5Ao/edit?usp=sharing
+
+Route Handling(GET request only):
+To test if API is up and running: http://127.0.0.1:5000/ 
+Should return "Hello World!"
+
+To test if database is connected: http://127.0.0.1:5000/hello 
+Should return "Connected to inHealth Database"
+
+Data retreiving routes: http://127.0.0.1:5000/clinician/patient/today/<rmId>
+						http://127.0.0.1:5000/clinician/patient/week/<rmId>
+						http://127.0.0.1:5000/clinician/patient/month/<rmId>
+
+Please ask the project manager for database's username and password and set them as environment variables.
+For Mac/Linux, environment varaibles should be stored in .bash_profile with the format: 
+export secret_varaible_name = "secret_key"

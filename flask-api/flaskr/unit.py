@@ -13,8 +13,9 @@ ut = Blueprint('unit', __name__)
 @ut.route('/clinician/unit/week', methods=['GET'])
 def week():
 	db = get_db()
-	today = date.today()
-	db.execute("SELECT sum(L.distance)/count(distinct L.patient_ID), (sum(L.distance)/sum(L.duration))*0.0113636*60, sum(L.duration)/count(distinct L.patient_ID), count(L.time_of_day)/count(distinct L.patient_ID) FROM live_details AS L LEFT JOIN patient_info AS P ON L.patient_ID = P.patient_ID WHERE L.amb_date >=  (DATEADD(dd, -(DATEPART(dw, %s)-1), %s));", (today, today))
+	#today = date.today()
+	today = "2020-12-02"
+	db.execute("SELECT sum(L.distance)/count(distinct L.patient_ID), avg(L.speed), sum(L.duration)/count(distinct L.patient_ID), sum(L.ambulation)/count(distinct L.patient_ID) FROM mmambulation.live_details AS L LEFT JOIN mmambulation.patient_info AS P ON L.patient_ID = P.patient_ID WHERE L.date >=  (DATEADD(dd, -(DATEPART(dw, %s)-1), %s));", (today, today))
 	row = db.fetchone()
 	x = [{"date": 0, "distance": row[0], "speed": row[1], "duration": row[2], "num_amb": row[3]}]
 	resp = jsonify(x)
@@ -24,7 +25,7 @@ def week():
 def month():
 	db = get_db()
 	today = date.today()
-	db.execute("SELECT sum(L.distance)/count(distinct L.patient_ID), (sum(L.distance)/sum(L.duration))*0.0113636*60, sum(L.duration)/count(distinct L.patient_ID), count(L.time_of_day)/count(distinct L.patient_ID) FROM live_details AS L LEFT JOIN patient_info AS P ON L.patient_ID = P.patient_ID WHERE L.amb_date >=  (DATEADD(dd, -(DATEPART(dd, %s)-1), %s));", (today, today))
+	db.execute("SELECT sum(L.distance)/count(distinct L.patient_ID), avg(L.speed), sum(L.duration)/count(distinct L.patient_ID), sum(L.ambulation)/count(distinct L.patient_ID) FROM mmambulation.live_details AS L LEFT JOIN mmambulation.patient_info AS P ON L.patient_ID = P.patient_ID WHERE L.date >=  (DATEADD(dd, -(DATEPART(dd, %s)-1), %s));", (today, today))
 	row = db.fetchone()
 	x = [{"date": 0, "distance": row[0], "speed": row[1], "duration": row[2], "num_amb": row[3]}]
 	resp = jsonify(x)
@@ -33,16 +34,22 @@ def month():
 @ut.route('/clinician/unit/details', methods=['GET'])
 def details():
 	db = get_db()
-	today = date.today()
-	query_total = 'SELECT L.patient_ID AS id , sum(L.distance) AS distance, sum(L.duration) AS duration, count(L.ambulation) AS ambulation, max(P.room_number) AS room, DATEDIFF(dd, max(P.admission_date), %s) AS total_los, DATEDIFF(dd, max(P.transfer_date), %s) AS pcu_los, count(L.ambulation)/DATEDIFF(dd, max(P.transfer_date), %s) AS avg_amb FROM live_details AS L LEFT JOIN patient_info AS P ON L.patient_ID = P.patient_ID GROUP BY L.patient_ID ORDER BY L.patient_ID'
+	#today = date.today()
+	today = "2020-11-30"
+	query_total = 'SELECT L.patient_ID AS id , sum(L.distance) AS distance, sum(L.duration) AS duration, count(L.ambulation) AS ambulation, max(P.room_number) AS room, DATEDIFF(dd, max(P.admission_date), %s) AS total_los, DATEDIFF(dd, max(P.transfer_date), %s) AS pcu_los, count(L.ambulation)/DATEDIFF(dd, max(P.transfer_date), %s) AS avg_amb FROM mmambulation.live_details AS L LEFT JOIN mmambulation.patient_info AS P ON L.patient_ID = P.patient_ID GROUP BY L.patient_ID ORDER BY L.patient_ID'
 	db.execute(query_total, (today, today, today))
 	result_total = db.fetchall()
-	query_today = 'SELECT patient_ID AS id, sum(distance) AS today_distance, sum(duration) AS today_duration, count(ambulation) AS today_ambulation FROM live_details WHERE amb_date = %s GROUP BY patient_ID ORDER BY patient_ID'
+	query_today = 'SELECT patient_ID AS id, sum(distance) AS today_distance, sum(duration) AS today_duration, count(ambulation) AS today_ambulation FROM mmambulation.live_details WHERE date = %s GROUP BY patient_ID ORDER BY patient_ID'
 	db.execute(query_today, (today))
 	result_today = db.fetchall()
-	query_yest = 'SELECT patient_ID AS id, sum(distance) AS yest_distance, sum(duration) AS yest_duration, count(ambulation) AS yest_ambulation FROM live_details WHERE amb_date = DATEADD(dd, -1, %s) GROUP BY patient_ID ORDER BY patient_ID'
+	query_yest = 'SELECT patient_ID AS id, sum(distance) AS yest_distance, sum(duration) AS yest_duration, count(ambulation) AS yest_ambulation FROM mmambulation.live_details WHERE date = DATEADD(dd, -1, %s) GROUP BY patient_ID ORDER BY patient_ID'
 	db.execute(query_yest, (today))
 	result_yest = db.fetchall()
+	print(result_total)
+	print("\n")
+	print(result_yest)
+	print("\n")
+	print(result_today)
 	x = []
 	i = 0
 	j = 0

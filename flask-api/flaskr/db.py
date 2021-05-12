@@ -9,3 +9,6 @@ def get_db():
 	conn = pymssql.connect(server= 'inhealth.wse.jhu.edu', user='WIN\\WSE-MeasurementCorps', password='KwGCyTn97nSkFGaFnwP', database='master')
 	cursor = conn.cursor()
 	return cursor
+
+
+

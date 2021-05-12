@@ -5,16 +5,18 @@ from flask import (
 from werkzeug.exceptions import abort
 
 from flaskr.db import get_db
-from datetime import date
+from datetime import datetime
+from pytz import timezone
 
 ut = Blueprint('unit', __name__)
+tz = timezone('EST')
 
 
 @ut.route('/clinician/unit/week', methods=['GET'])
 def week():
 	db = get_db()
-	#today = date.today()
-	today = "2020-12-02"
+	#today = datetime.now(tz)
+	today = "2021-03-24"
 	db.execute("SELECT sum(L.distance)/count(distinct L.patient_ID), avg(L.speed), sum(L.duration)/count(distinct L.patient_ID), sum(L.ambulation)/count(distinct L.patient_ID) FROM mmambulation.live_details AS L LEFT JOIN mmambulation.patient_info AS P ON L.patient_ID = P.patient_ID WHERE L.date >=  (DATEADD(dd, -(DATEPART(dw, %s)-1), %s));", (today, today))
 	row = db.fetchone()
 	x = [{"date": 0, "distance": row[0], "speed": row[1], "duration": row[2], "num_amb": row[3]}]
@@ -24,7 +26,8 @@ def week():
 @ut.route('/clinician/unit/month', methods=['GET'])
 def month():
 	db = get_db()
-	today = date.today()
+	#today = datetime.now(tz)
+	today = "2021-03-24"
 	db.execute("SELECT sum(L.distance)/count(distinct L.patient_ID), avg(L.speed), sum(L.duration)/count(distinct L.patient_ID), sum(L.ambulation)/count(distinct L.patient_ID) FROM mmambulation.live_details AS L LEFT JOIN mmambulation.patient_info AS P ON L.patient_ID = P.patient_ID WHERE L.date >=  (DATEADD(dd, -(DATEPART(dd, %s)-1), %s));", (today, today))
 	row = db.fetchone()
 	x = [{"date": 0, "distance": row[0], "speed": row[1], "duration": row[2], "num_amb": row[3]}]
@@ -34,8 +37,8 @@ def month():
 @ut.route('/clinician/unit/details', methods=['GET'])
 def details():
 	db = get_db()
-	#today = date.today()
-	today = "2020-11-30"
+	#today = datetime.now(tz)
+	today = "2021-03-24"
 	query_total = 'SELECT L.patient_ID AS id , sum(L.distance) AS distance, sum(L.duration) AS duration, count(L.ambulation) AS ambulation, max(P.room_number) AS room, DATEDIFF(dd, max(P.admission_date), %s) AS total_los, DATEDIFF(dd, max(P.transfer_date), %s) AS pcu_los, count(L.ambulation)/DATEDIFF(dd, max(P.transfer_date), %s) AS avg_amb FROM mmambulation.live_details AS L LEFT JOIN mmambulation.patient_info AS P ON L.patient_ID = P.patient_ID GROUP BY L.patient_ID ORDER BY L.patient_ID'
 	db.execute(query_total, (today, today, today))
 	result_total = db.fetchall()
